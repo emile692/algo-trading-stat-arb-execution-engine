@@ -1,0 +1,28 @@
+{
+  "pairs": [
+    {
+      "name": "MSFT_AAPL",
+      "leg1": "MSFT",
+      "leg2": "AAPL",
+      "hedge_ratio": 1.12,
+      "z_entry": 2.0,
+      "z_exit": 0.5
+    },
+    {
+      "name": "XOM_CVX",
+      "leg1": "XOM",
+      "leg2": "CVX",
+      "hedge_ratio": 0.87,
+      "z_entry": 2.2,
+      "z_exit": 0.4
+    },
+    {
+      "name": "GOOGL_META",
+      "leg1": "GOOGL",
+      "leg2": "META",
+      "hedge_ratio": 1.05,
+      "z_entry": 2.0,
+      "z_exit": 0.5
+    }
+  ]
+}
