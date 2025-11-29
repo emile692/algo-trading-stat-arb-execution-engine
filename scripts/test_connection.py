@@ -15,7 +15,7 @@ def main():
 
     # ⚠️ Paramètres : adapter si tu utilises IB Gateway
     HOST = "127.0.0.1"
-    PORT = 7497  # 7497 = paper trading TWS
+    PORT = 4002
     CLIENT_ID = 1
 
     ibkr = IBKRConnection(host=HOST, port=PORT, client_id=CLIENT_ID)
@@ -41,6 +41,7 @@ def main():
     contract = Stock("AAPL", "SMART", "USD")
 
     # Souscription aux données
+    ib.reqMarketDataType(3)
     market_data = ib.reqMktData(contract, snapshot=False, regulatorySnapshot=False)
 
     # Attend quelques ticks
