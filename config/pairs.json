@@ -1,26 +1,50 @@
 {
   "pairs": [
     {
-      "name": "MSFT_AAPL",
-      "leg1": "MSFT",
-      "leg2": "AAPL",
-      "hedge_ratio": 1.12,
+      "name": "AIR_BNP",
+      "leg1": {
+        "symbol": "AIR",
+        "currency": "EUR",
+        "primaryExchange": "SBF"
+      },
+      "leg2": {
+        "symbol": "BNP",
+        "currency": "EUR",
+        "primaryExchange": "SBF"
+      },
+      "hedge_ratio": 0.85,
       "z_entry": 2.0,
       "z_exit": 0.5
     },
     {
-      "name": "XOM_CVX",
-      "leg1": "XOM",
-      "leg2": "CVX",
-      "hedge_ratio": 0.87,
+      "name": "OR_MC",
+      "leg1": {
+        "symbol": "OR",
+        "currency": "EUR",
+        "primaryExchange": "SBF"
+      },
+      "leg2": {
+        "symbol": "MC",
+        "currency": "EUR",
+        "primaryExchange": "SBF"
+      },
+      "hedge_ratio": 1.1,
       "z_entry": 2.2,
       "z_exit": 0.4
     },
     {
-      "name": "GOOGL_META",
-      "leg1": "GOOGL",
-      "leg2": "META",
-      "hedge_ratio": 1.05,
+      "name": "SAP_BMW",
+      "leg1": {
+        "symbol": "SAP",
+        "currency": "EUR",
+        "primaryExchange": "IBIS"
+      },
+      "leg2": {
+        "symbol": "BMW",
+        "currency": "EUR",
+        "primaryExchange": "IBIS"
+      },
+      "hedge_ratio": 0.95,
       "z_entry": 2.0,
       "z_exit": 0.5
     }
