@@ -15,7 +15,7 @@ def main():
 
     # ⚠️ Paramètres : adapter si tu utilises IB Gateway
     HOST = "127.0.0.1"
-    PORT = 4002
+    PORT = 4001
     CLIENT_ID = 1
 
     ibkr = IBKRConnection(host=HOST, port=PORT, client_id=CLIENT_ID)
@@ -38,7 +38,12 @@ def main():
 
     ib = ibkr.ib  # Access the underlying IB() instance
 
-    contract = Stock("AAPL", "SMART", "USD")
+    contract = Stock(
+        symbol="AIR",
+        exchange="SMART",
+        currency="EUR",
+        primaryExchange="SBF"  # important pour éviter ambiguïtés
+    )
 
     # Souscription aux données
     ib.reqMarketDataType(3)
