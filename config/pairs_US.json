@@ -1,0 +1,64 @@
+{
+  "pairs": [
+    {
+      "name": "KO_PEP",
+      "leg1": {
+        "symbol": "KO",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NYSE"
+      },
+      "leg2": {
+        "symbol": "PEP",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NASDAQ"
+      },
+      "params": {
+        "hedge_ratio": 0.95,
+        "z_entry": 2.0,
+        "z_exit": 0.5
+      }
+    },
+    {
+      "name": "XOM_CVX",
+      "leg1": {
+        "symbol": "XOM",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NYSE"
+      },
+      "leg2": {
+        "symbol": "CVX",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NYSE"
+      },
+      "params": {
+        "hedge_ratio": 1.05,
+        "z_entry": 2.2,
+        "z_exit": 0.6
+      }
+    },
+    {
+      "name": "MSFT_AAPL",
+      "leg1": {
+        "symbol": "MSFT",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NASDAQ"
+      },
+      "leg2": {
+        "symbol": "AAPL",
+        "currency": "USD",
+        "exchange": "SMART",
+        "primaryExchange": "NASDAQ"
+      },
+      "params": {
+        "hedge_ratio": 1.10,
+        "z_entry": 2.0,
+        "z_exit": 0.5
+      }
+    }
+  ]
+}

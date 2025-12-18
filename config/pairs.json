@@ -12,9 +12,11 @@
         "currency": "EUR",
         "primaryExchange": "SBF"
       },
-      "hedge_ratio": 0.85,
-      "z_entry": 2.0,
-      "z_exit": 0.5
+      "params": {
+        "hedge_ratio": 0.85,
+        "z_entry": 2.0,
+        "z_exit": 0.5
+      }
     },
     {
       "name": "OR_MC",
@@ -28,9 +30,11 @@
         "currency": "EUR",
         "primaryExchange": "SBF"
       },
-      "hedge_ratio": 1.1,
-      "z_entry": 2.2,
-      "z_exit": 0.4
+      "params": {
+        "hedge_ratio": 1.1,
+        "z_entry": 2.2,
+        "z_exit": 0.4
+      }
     },
     {
       "name": "SAP_BMW",
@@ -44,9 +48,11 @@
         "currency": "EUR",
         "primaryExchange": "IBIS"
       },
-      "hedge_ratio": 0.95,
-      "z_entry": 2.0,
-      "z_exit": 0.5
+      "params": {
+        "hedge_ratio": 0.95,
+        "z_entry": 2.0,
+        "z_exit": 0.5
+      }
     }
   ]
 }

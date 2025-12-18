@@ -1,0 +1,18 @@
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
+
+
+class SignalType(Enum):
+    ENTRY_LONG = "ENTRY_LONG"
+    ENTRY_SHORT = "ENTRY_SHORT"
+    EXIT = "EXIT"
+
+
+@dataclass
+class SignalEvent:
+    pair: str
+    signal: SignalType
+    zscore: float
+    spread: float
+    timestamp: float

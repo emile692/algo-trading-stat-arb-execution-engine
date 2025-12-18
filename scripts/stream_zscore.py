@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from collections import deque
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -13,9 +11,21 @@ from config.load_pairs import load_pairs_config
 from infra.contracts import make_stock_contract
 from infra.ibkr_connection import IBKRConnection
 
-# -----------------------------
-# Params
-# -----------------------------
+from engine.stat_arb_pair import StatArbPair
+from engine.signal_engine import SignalEngine
+from engine.signal_event import SignalType
+from engine.execution_engine import ExecutionEngine
+from engine.event_logger import EventLogger
+
+import time
+
+
+# =====================================================
+# PARAMS
+# =====================================================
+MTM_LOG_EVERY = 5.0
+last_mtm_log: dict[str, float] = {}
+
 WINDOW = 200
 REFRESH_SEC = 1.0
 PAIRS_PATH = Path(__file__).resolve().parents[1] / "config" / "pairs.json"
@@ -24,15 +34,13 @@ IB_HOST = "127.0.0.1"
 IB_PORT = 4001
 IB_CLIENT_ID = 1
 
-# Si ton terminal Windows/PyCharm ne gère pas bien les couleurs, mets False
 USE_COLORS = True
 
 
-# -----------------------------
-# UI helpers (ANSI)
-# -----------------------------
+# =====================================================
+# ANSI
+# =====================================================
 RESET = "\x1b[0m"
-DIM = "\x1b[2m"
 BOLD = "\x1b[1m"
 
 RED = "\x1b[31m"
@@ -48,7 +56,6 @@ def colorize(txt: str, color: str) -> str:
 
 
 def clear_screen() -> None:
-    # Compatible console PyCharm / Windows : ANSI clear + cursor home
     sys.stdout.write("\x1b[2J\x1b[H")
     sys.stdout.flush()
 
@@ -57,13 +64,6 @@ def render_frame(text: str) -> None:
     clear_screen()
     sys.stdout.write(text)
     sys.stdout.flush()
-
-
-def progress_bar(pct: float, width: int = 18) -> str:
-    pct = max(0.0, min(100.0, pct))
-    filled = int(round(width * pct / 100.0))
-    bar = "█" * filled + "-" * (width - filled)
-    return f"[{bar}]"
 
 
 def z_color(z: float) -> str:
@@ -77,195 +77,168 @@ def z_color(z: float) -> str:
     return GREEN
 
 
-# -----------------------------
-# Core
-# -----------------------------
-@dataclass
-class PairState:
-    name: str
-    sym1: str
-    sym2: str
-    hedge_ratio: float
-    window: int
-
-    p1: Optional[float] = None
-    p2: Optional[float] = None
-    spreads: deque = None
-
-    def __post_init__(self) -> None:
-        self.spreads = deque(maxlen=self.window)
-
-    def update_price(self, symbol: str, price: float) -> None:
-        if symbol == self.sym1:
-            self.p1 = price
-        elif symbol == self.sym2:
-            self.p2 = price
-
-        if self.p1 is None or self.p2 is None:
-            return
-
-        spread = float(self.p1) - float(self.hedge_ratio) * float(self.p2)
-        self.spreads.append(spread)
-
-    def warmup_pct(self) -> float:
-        return (len(self.spreads) / float(self.window)) * 100.0
-
-    def ready(self) -> bool:
-        return len(self.spreads) >= self.window
-
-    def last_spread(self) -> Optional[float]:
-        if not self.spreads:
-            return None
-        return self.spreads[-1]
-
-    def zscore(self) -> Optional[float]:
-        if not self.ready():
-            return None
-        xs = list(self.spreads)
-        mu = sum(xs) / len(xs)
-        var = sum((x - mu) ** 2 for x in xs) / len(xs)
-        std = var ** 0.5
-        if std == 0.0:
-            return 0.0
-        return (xs[-1] - mu) / std
-
-
+# =====================================================
+# DATA HELPERS
+# =====================================================
 def _price_from_ticker(t: Ticker) -> Optional[float]:
-    # marketPrice() est souvent le plus robuste dans ib_insync
     px = t.marketPrice()
-    if px is None or px != px:  # NaN guard
-        return None
-    if px <= 0:
+    if px is None or px != px or px <= 0:
         return None
     return float(px)
 
 
-def build_table(states: Dict[str, PairState]) -> str:
+# =====================================================
+# UI
+# =====================================================
+def build_table(
+    pairs: Dict[str, StatArbPair],
+    execution: ExecutionEngine,
+) -> str:
     lines = []
-
-    header = (
-        f"{BOLD}PAIR{' ' * 14}P1{' ' * 9}P2{' ' * 8}SPREAD{' ' * 9}Z{' ' * 23}WARMUP{RESET}"
-        if USE_COLORS else
-        "PAIR               P1         P2        SPREAD         Z                       WARMUP"
+    lines.append(
+        f"{BOLD}PAIR{' '*20}P1{' '*8}P2{' '*8}SPREAD{' '*8}Z{' '*6}"
+        f"SIGNAL{' '*4}POSITION{RESET}"
     )
-    lines.append(header)
-    lines.append("-" * 85)
+    lines.append("-" * 95)
 
-    for st in states.values():
-        p1 = "--" if st.p1 is None else f"{st.p1:8.2f}"
-        p2 = "--" if st.p2 is None else f"{st.p2:8.2f}"
+    for pair in pairs.values():
+        p1 = "--" if pair.p1 is None else f"{pair.p1:8.2f}"
+        p2 = "--" if pair.p2 is None else f"{pair.p2:8.2f}"
 
-        sp = st.last_spread()
-        spread_str = "--" if sp is None else f"{sp:12.4f}"
+        sp = pair.last_spread()
+        sp_str = "--" if sp is None else f"{sp:10.4f}"
 
-        z = st.zscore()
-        if z is None:
-            z_str = "--"
-        else:
-            z_str = f"{z:8.3f}"
-            z_str = colorize(z_str, z_color(z))
+        z = pair.zscore()
+        z_str = "--" if z is None else colorize(f"{z:6.3f}", z_color(z))
 
-        pct = st.warmup_pct()
-        bar = progress_bar(pct, 18)
-        bar = colorize(bar, DIM) if USE_COLORS else bar
+        last_ev = execution.last_signal.get(pair.name)
+        sig_str = "--" if last_ev is None else last_ev.signal.value
+
+        pos = execution.positions.get(pair.name)
+
+        if pos is None or pos.side is None:
+            pos_str = "FLAT"
+        elif pos.side == SignalType.ENTRY_LONG:
+            pos_str = "LONG"
+        elif pos.side == SignalType.ENTRY_SHORT:
+            pos_str = "SHORT"
 
         lines.append(
-            f"{st.name:<18}{p1:>10}  {p2:>8}  {spread_str:>12}  {z_str:>8}  {bar}  {pct:6.1f}%"
+            f"{pair.name:<18}{p1:>10}{p2:>10}{sp_str:>12}  "
+            f"{z_str:>6}  {sig_str:>8}  {pos_str:>8}"
         )
 
     lines.append("\nCTRL+C to stop")
     return "\n".join(lines)
 
 
+# =====================================================
+# MAIN
+# =====================================================
 def main() -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-    )
-
+    global last_mtm_log
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     logging.info("Starting z-score streaming")
 
-    # 1) Load pairs config (normalisée)
     pairs_cfg = load_pairs_config(PAIRS_PATH)
 
-    # 2) Connect IBKR
-    conn = IBKRConnection(host=IB_HOST, port=IB_PORT, client_id=IB_CLIENT_ID)
+    log_dir = Path(__file__).resolve().parents[1] / "logs"
+    logger = EventLogger(log_dir)
+    execution_engine = ExecutionEngine(logger=logger)
+
+    conn = IBKRConnection(IB_HOST, IB_PORT, IB_CLIENT_ID)
     conn.connect()
     ib: IB = conn.ib
-    logging.info("Connected to IBKR")
 
-    # 3) Build states + subscribe tickers
-    states: Dict[str, PairState] = {}
-    tickers_by_symbol: Dict[str, Ticker] = {}
+    pairs: Dict[str, StatArbPair] = {}
+    signal_engines: Dict[str, SignalEngine] = {}
+    tickers: Dict[str, Ticker] = {}
 
+    # ---- INIT PAIRS
     for cfg in pairs_cfg:
-        name = cfg["name"]
-        a1 = cfg["asset1"]
-        a2 = cfg["asset2"]
-        sym1 = a1["symbol"]
-        sym2 = a2["symbol"]
-        hr = float(cfg.get("hedge_ratio", 1.0))
-
-        st = PairState(name=name, sym1=sym1, sym2=sym2, hedge_ratio=hr, window=WINDOW)
-        states[name] = st
-
-        c1 = make_stock_contract(
-            symbol=sym1,
-            currency=a1.get("currency", "EUR"),
-            exchange=a1.get("exchange", "SMART"),
-            primary_exchange=a1.get("primary_exchange"),
+        pair = StatArbPair(
+            name=cfg["name"],
+            sym1=cfg["asset1"]["symbol"],
+            sym2=cfg["asset2"]["symbol"],
+            hedge_ratio=cfg["hedge_ratio"],
+            window=WINDOW,
         )
-        c2 = make_stock_contract(
-            symbol=sym2,
-            currency=a2.get("currency", "EUR"),
-            exchange=a2.get("exchange", "SMART"),
-            primary_exchange=a2.get("primary_exchange"),
+        pairs[pair.name] = pair
+
+        signal_engines[pair.name] = SignalEngine(
+            cfg["z_entry"],
+            cfg["z_exit"],
         )
 
-        t1 = ib.reqMktData(c1, "", False, False)
-        t2 = ib.reqMktData(c2, "", False, False)
+        for asset in (cfg["asset1"], cfg["asset2"]):
+            sym = asset["symbol"]
+            if sym not in tickers:
+                c = make_stock_contract(
+                    symbol=sym,
+                    currency=asset.get("currency", "EUR"),
+                    exchange=asset.get("exchange", "SMART"),
+                    primary_exchange=asset.get("primary_exchange"),
+                )
+                tickers[sym] = ib.reqMktData(c, "", False, False)
 
-        tickers_by_symbol[sym1] = t1
-        tickers_by_symbol[sym2] = t2
+        logging.info(f"Subscribed {pair.name}")
 
-        logging.info(f"Subscribed {name}: {sym1} / {sym2} (hedge_ratio={hr})")
-
-    # 4) Loop
+    # ---- LOOP
     try:
         while True:
-            # Heartbeat / connection check
-            try:
-                conn.heartbeat()
-            except Exception:
-                pass
+            conn.heartbeat()
 
-            # Pull prices and update spreads
-            for st in states.values():
-                t1 = tickers_by_symbol.get(st.sym1)
-                t2 = tickers_by_symbol.get(st.sym2)
+            for pair in pairs.values():
+                for sym in (pair.sym1, pair.sym2):
+                    t = tickers.get(sym)
+                    if t:
+                        px = _price_from_ticker(t)
+                        if px is not None:
+                            pair.update_price(sym, px)
 
-                if t1 is not None:
-                    p = _price_from_ticker(t1)
-                    if p is not None:
-                        st.update_price(st.sym1, p)
+                z = pair.zscore()
+                spread = pair.last_spread()
 
-                if t2 is not None:
-                    p = _price_from_ticker(t2)
-                    if p is not None:
-                        st.update_price(st.sym2, p)
+                if spread is not None:
+                    execution_engine.mark_to_market(pair.name, spread)
 
-            # Render (1 seule frame)
-            render_frame(build_table(states))
+                now = time.time()
+                last = last_mtm_log.get(pair.name, 0.0)
 
+                if now - last >= MTM_LOG_EVERY:
+                    pos = execution_engine.positions.get(pair.name)
+                    if pos and pos.side:
+                        execution_engine.logger.log_mtm(
+                            ts=now,
+                            pair=pair.name,
+                            position="LONG" if pos.side == SignalType.ENTRY_LONG else "SHORT",
+                            spread=spread,
+                            pnl=pos.pnl,
+                            max_dd=pos.max_dd,
+                        )
+                    last_mtm_log[pair.name] = now
+
+                engine = signal_engines[pair.name]
+                in_pos = (
+                    execution_engine.positions.get(pair.name) is not None
+                    and execution_engine.positions[pair.name].side is not None
+                )
+
+                ev = engine.generate(pair.name, z, spread, in_pos)
+                if ev:
+                    execution_engine.on_signal(ev)
+
+            render_frame(build_table(pairs, execution_engine))
             ib.sleep(REFRESH_SEC)
 
     except KeyboardInterrupt:
         logging.info("Stopped by user.")
     finally:
         try:
-            ib.disconnect()
+            logger.close()
         except Exception:
             pass
+        ib.disconnect()
 
 
 if __name__ == "__main__":

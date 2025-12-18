@@ -91,11 +91,15 @@ def _normalize_pair_cfg(raw: Dict[str, Any]) -> Dict[str, Any]:
         if not name:
             name = f"{sym1}_{sym2}"
 
+        params = raw.get("params", {})
+
         return {
             "name": name,
             "asset1": {"symbol": sym1, "currency": ccy1, "exchange": ex1, "primary_exchange": pex1},
             "asset2": {"symbol": sym2, "currency": ccy2, "exchange": ex2, "primary_exchange": pex2},
             "hedge_ratio": float(raw.get("hedge_ratio", raw.get("beta", 1.0))),
+            "z_entry": float(params["z_entry"]),
+            "z_exit": float(params["z_exit"]),
         }
 
     raise ValueError("Format paire inconnu: attendu asset1/asset2 ou leg1/leg2")

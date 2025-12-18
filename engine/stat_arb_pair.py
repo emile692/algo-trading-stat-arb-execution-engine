@@ -1,74 +1,58 @@
-# engine/stat_arb_pair.py
-
-import numpy as np
-
-class StatArbPair() :
-
-    def __init__(self, name, leg1, leg2, hedge_ratio, z_entry, z_exit) :
-        self._name = name
-        self._leg1 = leg1
-        self._leg2 = leg2
-        self._hedge_ratio = hedge_ratio
-        self._z_entry = z_entry
-        self._z_exit = z_exit
-        self._last_price_leg1 = None
-        self._last_price_leg2 = None
-        self._last_spread = None
-        self._spread_history = []
-
-    def update_prices(self, price1 : float, price2 : float) :
-        self._last_price_leg1 = price1
-        self._last_price_leg2 = price2
-        self._last_spread = price1 - self._hedge_ratio * price2
-        self._spread_history.append(self._last_spread)
-
-    def compute_z_score(self, window : int , spread : float) -> float  :
-        if len(self._spread_history) >= window :
-            mean = np.mean(self._spread_history[-window:])
-            sigma = np.std(self._spread_history[-window:])
-            if sigma == 0 :
-                return None
-            z_score = (spread-mean)/ sigma
-            return z_score
-        else :
-            raise ValueError("Not enough data to compute z-score")
+from __future__ import annotations
+from collections import deque
+from typing import Optional
 
 
-    def get_latest_spread(self) -> float :
-        return self._last_spread
+class StatArbPair:
+    def __init__(
+        self,
+        name: str,
+        sym1: str,
+        sym2: str,
+        hedge_ratio: float,
+        window: int,
+    ) -> None:
+        self.name = name
+        self.sym1 = sym1
+        self.sym2 = sym2
+        self.hedge_ratio = hedge_ratio
+        self.window = window
 
-    def reset_history(self) :
-        self._spread_history.clear()
+        self.p1: Optional[float] = None
+        self.p2: Optional[float] = None
+        self.spreads = deque(maxlen=window)
 
-    def should_long(self, zscore) :
-        return zscore <= -self._z_entry
+    # -----------------------------
+    # Prices / Spread
+    # -----------------------------
+    def update_price(self, symbol: str, price: float) -> None:
+        if symbol == self.sym1:
+            self.p1 = price
+        elif symbol == self.sym2:
+            self.p2 = price
 
-    def should_short(self, zscore) :
-        return zscore >= self._z_entry
+        if self.p1 is None or self.p2 is None:
+            return
 
-    def should_close(self, zscore) :
-        return abs(zscore) <= self._z_exit
+        spread = self.p1 - self.hedge_ratio * self.p2
+        self.spreads.append(spread)
 
-    @property
-    def leg1(self):
-        return self._leg1
+    def ready(self) -> bool:
+        return len(self.spreads) >= self.window
 
-    @property
-    def leg2(self):
-        return self._leg2
+    def last_spread(self) -> Optional[float]:
+        return self.spreads[-1] if self.spreads else None
 
-    @property
-    def hedge_ratio(self):
-        return self._hedge_ratio
+    def zscore(self) -> Optional[float]:
+        if not self.ready():
+            return None
 
-    @property
-    def z_entry(self):
-        return self._z_entry
+        xs = list(self.spreads)
+        mu = sum(xs) / len(xs)
+        var = sum((x - mu) ** 2 for x in xs) / len(xs)
+        std = var ** 0.5
 
-    @property
-    def z_exit(self):
-        return self._z_exit
+        if std == 0:
+            return 0.0
 
-
-
-
+        return (xs[-1] - mu) / std
