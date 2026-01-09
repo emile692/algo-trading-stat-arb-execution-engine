@@ -2,57 +2,69 @@
   "pairs": [
     {
       "name": "AIR_BNP",
-      "leg1": {
-        "symbol": "AIR",
-        "currency": "EUR",
-        "primaryExchange": "SBF"
-      },
-      "leg2": {
-        "symbol": "BNP",
-        "currency": "EUR",
-        "primaryExchange": "SBF"
-      },
-      "params": {
-        "hedge_ratio": 0.85,
-        "z_entry": 2.0,
-        "z_exit": 0.5
-      }
+      "leg1": { "symbol": "AIR", "currency": "EUR", "primaryExchange": "SBF" },
+      "leg2": { "symbol": "BNP", "currency": "EUR", "primaryExchange": "SBF" },
+      "params": { "hedge_ratio": 0.85, "z_entry": 2.0, "z_exit": 0.5 }
     },
     {
       "name": "OR_MC",
-      "leg1": {
-        "symbol": "OR",
-        "currency": "EUR",
-        "primaryExchange": "SBF"
-      },
-      "leg2": {
-        "symbol": "MC",
-        "currency": "EUR",
-        "primaryExchange": "SBF"
-      },
-      "params": {
-        "hedge_ratio": 1.1,
-        "z_entry": 2.2,
-        "z_exit": 0.4
-      }
+      "leg1": { "symbol": "OR", "currency": "EUR", "primaryExchange": "SBF" },
+      "leg2": { "symbol": "MC", "currency": "EUR", "primaryExchange": "SBF" },
+      "params": { "hedge_ratio": 1.10, "z_entry": 2.2, "z_exit": 0.4 }
     },
     {
       "name": "SAP_BMW",
-      "leg1": {
-        "symbol": "SAP",
-        "currency": "EUR",
-        "primaryExchange": "IBIS"
-      },
-      "leg2": {
-        "symbol": "BMW",
-        "currency": "EUR",
-        "primaryExchange": "IBIS"
-      },
-      "params": {
-        "hedge_ratio": 0.95,
-        "z_entry": 2.0,
-        "z_exit": 0.5
-      }
+      "leg1": { "symbol": "SAP", "currency": "EUR", "primaryExchange": "IBIS" },
+      "leg2": { "symbol": "BMW", "currency": "EUR", "primaryExchange": "IBIS" },
+      "params": { "hedge_ratio": 0.95, "z_entry": 2.0, "z_exit": 0.5 }
+    },
+
+    {
+      "name": "MBG_BMW",
+      "leg1": { "symbol": "MBG", "currency": "EUR", "primaryExchange": "IBIS" },
+      "leg2": { "symbol": "BMW", "currency": "EUR", "primaryExchange": "IBIS" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.0, "z_exit": 0.5 }
+    },
+    {
+      "name": "MBG_VOW3",
+      "leg1": { "symbol": "MBG", "currency": "EUR", "primaryExchange": "IBIS" },
+      "leg2": { "symbol": "VOW3", "currency": "EUR", "primaryExchange": "IBIS" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.0, "z_exit": 0.5 }
+    },
+
+    {
+      "name": "SIE_BAS",
+      "leg1": { "symbol": "SIE", "currency": "EUR", "primaryExchange": "IBIS" },
+      "leg2": { "symbol": "BAS", "currency": "EUR", "primaryExchange": "IBIS" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.0, "z_exit": 0.5 }
+    },
+    {
+      "name": "ADS_PUM",
+      "leg1": { "symbol": "ADS", "currency": "EUR", "primaryExchange": "IBIS" },
+      "leg2": { "symbol": "PUM", "currency": "EUR", "primaryExchange": "IBIS" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.2, "z_exit": 0.6 }
+    },
+
+    {
+      "name": "ENGI_VIE",
+      "leg1": { "symbol": "ENGI", "currency": "EUR", "primaryExchange": "SBF" },
+      "leg2": { "symbol": "VIE", "currency": "EUR", "primaryExchange": "SBF" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.2, "z_exit": 0.6 }
+    },
+
+    {
+      "name": "DG_VINCI",
+      "leg1": { "symbol": "DG", "currency": "EUR", "primaryExchange": "SBF" },
+      "leg2": { "symbol": "ENI", "currency": "EUR", "primaryExchange": "BVME" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.0, "z_exit": 0.5 }
+    },
+
+
+    {
+      "name": "ENEL_ENI",
+      "leg1": { "symbol": "ENEL", "currency": "EUR", "primaryExchange": "BVME" },
+      "leg2": { "symbol": "ENI", "currency": "EUR", "primaryExchange": "BVME" },
+      "params": { "hedge_ratio": 1.00, "z_entry": 2.2, "z_exit": 0.6 }
     }
   ]
 }
