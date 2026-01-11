@@ -11,6 +11,10 @@ from engine.risk_manager import RiskManager, RiskConfig
 from engine.order_plan import OrderPlan, LegOrder, OrderSide, OrderType
 from engine.order_manager import OrderManager, PaperOrderManager, ExecStatus
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from engine.portfolio_tracker import PortfolioTracker
+
 
 class PositionState(str, Enum):
     FLAT = "FLAT"
@@ -63,7 +67,9 @@ class ExecutionEngine:
         order_manager: Optional[OrderManager] = None,
         mtm_log_every_sec: float = 5.0,
         base_qty: float = 1.0,
+        portfolio: "PortfolioTracker | None" = None,
     ) -> None:
+        self.portfolio = portfolio
         self.logger = logger
         self.risk = risk_manager or RiskManager(risk_config or RiskConfig())
         self.om: OrderManager = order_manager or PaperOrderManager()
@@ -136,6 +142,10 @@ class ExecutionEngine:
                 )
             except Exception:
                 pass
+        if self.portfolio is not None:
+            # snapshotting est fait ailleurs, ici on ne fait qu'actualiser l'état temporel si tu veux plus tard.
+            # Pour Jalon A, on ne dépend pas d'un on_mtm hook.
+            pass
 
     def rebalance(self) -> None:
         now = time.time()
@@ -365,6 +375,19 @@ class ExecutionEngine:
             pos.side = None
             pos.cooldown_until = time.time() + float(self.risk.cfg.cooldown_sec)
             pos.last_plan_status = report.status.value
+            if self.portfolio is not None:
+                try:
+                    self.portfolio.on_trade_close(
+                        ts=time.time(),
+                        pair=pair,
+                        trade_id=pos.trade_id,
+                        pnl_spread=float(pos.pnl),
+                        max_dd_spread_units=float(pos.max_dd),
+                        exit_reason=exit_reason,
+                    )
+                except Exception as e:
+                    # on loggue l'erreur mais on ne casse pas l'exécution
+                    pos.last_error = f"Portfolio hook error: {type(e).__name__}: {e}"
             pos.trade_id = None
 
         except Exception as e:

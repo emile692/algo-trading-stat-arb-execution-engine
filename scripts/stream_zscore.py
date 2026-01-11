@@ -21,11 +21,15 @@ from engine.risk_manager import RiskManager, RiskConfig
 from engine.universe_manager import UniverseManager, UniverseConfig
 from engine.market_data_guard import MarketDataGuardConfig
 
+# --- JALON A ---
+from engine.portfolio_tracker import PortfolioTracker, PortfolioConfig
+from engine.state_publisher import StatePublisher
+
 
 # =====================================================
 # PARAMS
 # =====================================================
-WINDOW = 200
+WINDOW = 20
 REFRESH_SEC = 1.0
 PAIRS_PATH = Path(__file__).resolve().parents[1] / "config" / "pairs.json"
 
@@ -235,6 +239,16 @@ def main() -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
     logger = EventLogger(log_dir)
 
+    # --- JALON A: portfolio snapshots for live monitoring ---
+    portfolio = PortfolioTracker(
+        PortfolioConfig(
+            starting_equity=0.0,
+            pnl_scale=1.0,
+            base_currency="USD",
+        )
+    )
+    publisher = StatePublisher(log_dir)
+
     risk = RiskManager(
         RiskConfig(
             max_open_positions=MAX_OPEN_POSITIONS,
@@ -247,6 +261,7 @@ def main() -> None:
         logger=logger,
         risk_manager=risk,
         mtm_log_every_sec=MTM_LOG_EVERY,
+        portfolio=portfolio,  # <-- JALON A
     )
 
     conn = IBKRConnection(IB_HOST, IB_PORT, IB_CLIENT_ID)
@@ -277,7 +292,7 @@ def main() -> None:
     signal_engines: Dict[str, SignalEngine] = {}
 
     # -------------------------------------------------
-    # Build trading objects + register pair meta (Jalon 1)
+    # Build trading objects + register pair meta
     # -------------------------------------------------
     for cfg in enabled:
         pair = StatArbPair(
@@ -370,6 +385,11 @@ def main() -> None:
                     execution_engine.on_signal(ev)
 
             execution_engine.rebalance()
+
+            # --- JALON A: publish consolidated portfolio state for UI ---
+            snap = portfolio.build_snapshot(ts=now, execution_engine=execution_engine)
+            publisher.publish(snap)
+
             render_frame(build_table(pairs, execution_engine, max_open_positions=MAX_OPEN_POSITIONS))
             ib.sleep(REFRESH_SEC)
 
