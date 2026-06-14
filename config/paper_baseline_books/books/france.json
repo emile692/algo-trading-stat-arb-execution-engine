@@ -1,0 +1,37 @@
+{
+  "book": "france",
+  "country": "FR",
+  "stats_path": "research/pair_stats.sample.json",
+  "universe": [
+    {"symbol": "AIR", "currency": "EUR", "exchange": "SBF"},
+    {"symbol": "BNP", "currency": "EUR", "exchange": "SBF"},
+    {"symbol": "OR", "currency": "EUR", "exchange": "SBF"},
+    {"symbol": "MC", "currency": "EUR", "exchange": "SBF"},
+    {"symbol": "ENGI", "currency": "EUR", "exchange": "SBF"},
+    {"symbol": "VIE", "currency": "EUR", "exchange": "SBF"}
+  ],
+  "pairs": [
+    {
+      "pair_id": "AIR_BNP",
+      "asset_1": "AIR",
+      "asset_2": "BNP",
+      "beta": 0.85,
+      "fixture": {"profile": "mean_revert_short", "base_price_2": 58.0}
+    },
+    {
+      "pair_id": "OR_MC",
+      "asset_1": "OR",
+      "asset_2": "MC",
+      "beta": 1.1,
+      "fixture": {"profile": "mean_revert_long", "base_price_2": 71.0}
+    },
+    {
+      "pair_id": "ENGI_VIE",
+      "asset_1": "ENGI",
+      "asset_2": "VIE",
+      "beta": 1.0,
+      "thresholds": {"max_holding_days": 2},
+      "fixture": {"profile": "stale_short", "base_price_2": 33.0}
+    }
+  ]
+}

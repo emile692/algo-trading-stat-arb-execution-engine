@@ -1,0 +1,37 @@
+{
+  "book": "sweden",
+  "country": "SE",
+  "stats_path": "research/pair_stats.sample.json",
+  "universe": [
+    {"symbol": "ATCOA", "currency": "SEK", "exchange": "SFB"},
+    {"symbol": "ABB", "currency": "SEK", "exchange": "SFB"},
+    {"symbol": "ERICB", "currency": "SEK", "exchange": "SFB"},
+    {"symbol": "VOLV", "currency": "SEK", "exchange": "SFB"},
+    {"symbol": "SEBA", "currency": "SEK", "exchange": "SFB"},
+    {"symbol": "SWEDA", "currency": "SEK", "exchange": "SFB"}
+  ],
+  "pairs": [
+    {
+      "pair_id": "ATCOA_ABB",
+      "asset_1": "ATCOA",
+      "asset_2": "ABB",
+      "beta": 0.98,
+      "fixture": {"profile": "mean_revert_short", "base_price_2": 41.0}
+    },
+    {
+      "pair_id": "ERICB_VOLV",
+      "asset_1": "ERICB",
+      "asset_2": "VOLV",
+      "beta": 1.0,
+      "thresholds": {"max_holding_days": 2},
+      "fixture": {"profile": "stale_long", "base_price_2": 37.0}
+    },
+    {
+      "pair_id": "SEBA_SWEDA",
+      "asset_1": "SEBA",
+      "asset_2": "SWEDA",
+      "beta": 1.0,
+      "fixture": {"profile": "mean_revert_long", "base_price_2": 44.0}
+    }
+  ]
+}

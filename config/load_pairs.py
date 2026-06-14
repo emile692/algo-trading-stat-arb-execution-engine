@@ -93,11 +93,17 @@ def _normalize_pair_cfg(raw: Dict[str, Any]) -> Dict[str, Any]:
 
         params = raw.get("params", {})
 
+        hedge_ratio = raw.get("hedge_ratio")
+        if hedge_ratio is None:
+            hedge_ratio = params.get("hedge_ratio")
+        if hedge_ratio is None:
+            hedge_ratio = raw.get("beta", 1.0)
+
         return {
             "name": name,
             "asset1": {"symbol": sym1, "currency": ccy1, "exchange": ex1, "primary_exchange": pex1},
             "asset2": {"symbol": sym2, "currency": ccy2, "exchange": ex2, "primary_exchange": pex2},
-            "hedge_ratio": float(raw.get("hedge_ratio", raw.get("beta", 1.0))),
+            "hedge_ratio": float(hedge_ratio),
             "z_entry": float(params["z_entry"]),
             "z_exit": float(params["z_exit"]),
         }

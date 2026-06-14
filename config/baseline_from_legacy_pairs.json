@@ -1,0 +1,309 @@
+{
+  "defaults": {
+    "rolling_window": 20,
+    "thresholds": {
+      "z_entry": 1.8,
+      "z_exit": 0.6,
+      "z_stop": 3.6,
+      "max_holding_days": 10
+    },
+    "gate_thresholds": {
+      "corr_min": 0.3,
+      "adf_p_max": 0.05,
+      "eg_p_max": 0.05,
+      "half_life_max": 100.0
+    },
+    "gate_switches": {
+      "corr": false,
+      "adf": false,
+      "engle_granger": false,
+      "half_life": false
+    },
+    "top_k": 20,
+    "min_pairs_required": 1,
+    "allocation_mode": "equal_weight",
+    "gross_target": 1.0
+  },
+  "books": [
+    {
+      "book": "france",
+      "country": "FR",
+      "rolling_window": 20,
+      "top_k": 20,
+      "min_pairs_required": 1,
+      "allocation_mode": "equal_weight",
+      "gross_target": 1.0,
+      "universe": [
+        {
+          "symbol": "AIR",
+          "currency": "EUR",
+          "exchange": "SBF"
+        },
+        {
+          "symbol": "BNP",
+          "currency": "EUR",
+          "exchange": "SBF"
+        },
+        {
+          "symbol": "OR",
+          "currency": "EUR",
+          "exchange": "SBF"
+        },
+        {
+          "symbol": "MC",
+          "currency": "EUR",
+          "exchange": "SBF"
+        },
+        {
+          "symbol": "ENGI",
+          "currency": "EUR",
+          "exchange": "SBF"
+        },
+        {
+          "symbol": "VIE",
+          "currency": "EUR",
+          "exchange": "SBF"
+        }
+      ],
+      "pairs": [
+        {
+          "pair_id": "AIR_BNP",
+          "asset_1": "AIR",
+          "asset_2": "BNP",
+          "beta": 0.85,
+          "thresholds": {
+            "z_entry": 2.0,
+            "z_exit": 0.5,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "OR_MC",
+          "asset_1": "OR",
+          "asset_2": "MC",
+          "beta": 1.1,
+          "thresholds": {
+            "z_entry": 2.2,
+            "z_exit": 0.4,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "ENGI_VIE",
+          "asset_1": "ENGI",
+          "asset_2": "VIE",
+          "beta": 1.0,
+          "thresholds": {
+            "z_entry": 2.2,
+            "z_exit": 0.6,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        }
+      ]
+    },
+    {
+      "book": "germany",
+      "country": "DE",
+      "rolling_window": 20,
+      "top_k": 20,
+      "min_pairs_required": 1,
+      "allocation_mode": "equal_weight",
+      "gross_target": 1.0,
+      "universe": [
+        {
+          "symbol": "SAP",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "BMW",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "MBG",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "VOW3",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "SIE",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "BAS",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "ADS",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        },
+        {
+          "symbol": "PUM",
+          "currency": "EUR",
+          "exchange": "IBIS"
+        }
+      ],
+      "pairs": [
+        {
+          "pair_id": "SAP_BMW",
+          "asset_1": "SAP",
+          "asset_2": "BMW",
+          "beta": 0.95,
+          "thresholds": {
+            "z_entry": 2.0,
+            "z_exit": 0.5,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "MBG_BMW",
+          "asset_1": "MBG",
+          "asset_2": "BMW",
+          "beta": 1.0,
+          "thresholds": {
+            "z_entry": 2.0,
+            "z_exit": 0.5,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "MBG_VOW3",
+          "asset_1": "MBG",
+          "asset_2": "VOW3",
+          "beta": 1.0,
+          "thresholds": {
+            "z_entry": 2.0,
+            "z_exit": 0.5,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "SIE_BAS",
+          "asset_1": "SIE",
+          "asset_2": "BAS",
+          "beta": 1.0,
+          "thresholds": {
+            "z_entry": 2.0,
+            "z_exit": 0.5,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        },
+        {
+          "pair_id": "ADS_PUM",
+          "asset_1": "ADS",
+          "asset_2": "PUM",
+          "beta": 1.0,
+          "thresholds": {
+            "z_entry": 2.2,
+            "z_exit": 0.6,
+            "z_stop": 3.6,
+            "max_holding_days": 10
+          },
+          "gate_switches": {
+            "corr": false,
+            "adf": false,
+            "engle_granger": false,
+            "half_life": false
+          },
+          "readiness": {
+            "paper_ready": true,
+            "live_ready": false,
+            "notes": "Adapted from legacy pairs config."
+          }
+        }
+      ]
+    }
+  ]
+}

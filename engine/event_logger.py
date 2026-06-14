@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 import time
 import uuid
@@ -17,9 +18,12 @@ class EventLogger:
 
     Files:
       - signals.csv : every SignalEvent received by ExecutionEngine
+      - decisions.csv : baseline gating / signal / allocation decisions
       - orders.csv  : every OrderPlan executed + leg fills (paper or real later)
       - trades.csv  : one row per completed trade (ENTRY->EXIT)
       - mtm.csv     : mark-to-market snapshots (throttled by engine)
+      - positions.csv : position state snapshots
+      - exposures.csv : portfolio exposure snapshots
     """
 
     def __init__(self, base_dir: str | Path) -> None:
@@ -27,31 +31,51 @@ class EventLogger:
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
         self._signals_path = self.base_dir / "signals.csv"
+        self._decisions_path = self.base_dir / "decisions.csv"
         self._orders_path = self.base_dir / "orders.csv"
         self._trades_path = self.base_dir / "trades.csv"
         self._mtm_path = self.base_dir / "mtm.csv"
+        self._positions_path = self.base_dir / "positions.csv"
+        self._exposures_path = self.base_dir / "exposures.csv"
 
         self._signals_fh = open(self._signals_path, "a", newline="", encoding="utf-8")
+        self._decisions_fh = open(self._decisions_path, "a", newline="", encoding="utf-8")
         self._orders_fh = open(self._orders_path, "a", newline="", encoding="utf-8")
         self._trades_fh = open(self._trades_path, "a", newline="", encoding="utf-8")
         self._mtm_fh = open(self._mtm_path, "a", newline="", encoding="utf-8")
+        self._positions_fh = open(self._positions_path, "a", newline="", encoding="utf-8")
+        self._exposures_fh = open(self._exposures_path, "a", newline="", encoding="utf-8")
 
         self._signals_writer: Optional[csv.DictWriter] = None
+        self._decisions_writer: Optional[csv.DictWriter] = None
         self._orders_writer: Optional[csv.DictWriter] = None
         self._trades_writer: Optional[csv.DictWriter] = None
         self._mtm_writer: Optional[csv.DictWriter] = None
+        self._positions_writer: Optional[csv.DictWriter] = None
+        self._exposures_writer: Optional[csv.DictWriter] = None
 
         self._signals_needs_header = (self._signals_path.stat().st_size == 0)
+        self._decisions_needs_header = (self._decisions_path.stat().st_size == 0)
         self._orders_needs_header = (self._orders_path.stat().st_size == 0)
         self._trades_needs_header = (self._trades_path.stat().st_size == 0)
         self._mtm_needs_header = (self._mtm_path.stat().st_size == 0)
+        self._positions_needs_header = (self._positions_path.stat().st_size == 0)
+        self._exposures_needs_header = (self._exposures_path.stat().st_size == 0)
 
         # Track open trades to build round-trips safely even if engine restarts mid-session.
         # (v1: in-memory only; persistence/recovery comes in the next milestone)
         self._open_trades: Dict[str, Dict[str, Any]] = {}  # pair -> trade dict
 
     def close(self) -> None:
-        for fh in (self._signals_fh, self._orders_fh, self._trades_fh, self._mtm_fh):
+        for fh in (
+            self._signals_fh,
+            self._decisions_fh,
+            self._orders_fh,
+            self._trades_fh,
+            self._mtm_fh,
+            self._positions_fh,
+            self._exposures_fh,
+        ):
             try:
                 fh.flush()
                 os.fsync(fh.fileno())
@@ -70,6 +94,8 @@ class EventLogger:
             "signal": ev.signal.value,
             "zscore": ev.zscore,
             "spread": ev.spread,
+            "reason": ev.reason,
+            "meta_json": json.dumps(ev.meta, ensure_ascii=False, sort_keys=True) if ev.meta else None,
         }
 
         if self._signals_writer is None:
@@ -81,6 +107,41 @@ class EventLogger:
         self._signals_writer.writerow(row)
         self._signals_fh.flush()
         os.fsync(self._signals_fh.fileno())
+
+    # =====================================================
+    # DECISIONS
+    # =====================================================
+    def log_decision(
+        self,
+        *,
+        ts_event: float,
+        book: str,
+        pair: str,
+        stage: str,
+        decision: str,
+        reason: str,
+        details: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        row = {
+            "ts_wall": time.time(),
+            "ts_event": float(ts_event),
+            "book": book,
+            "pair": pair,
+            "stage": stage,
+            "decision": decision,
+            "reason": reason,
+            "details_json": json.dumps(details or {}, ensure_ascii=False, sort_keys=True),
+        }
+
+        if self._decisions_writer is None:
+            self._decisions_writer = csv.DictWriter(self._decisions_fh, fieldnames=row.keys())
+        if self._decisions_needs_header:
+            self._decisions_writer.writeheader()
+            self._decisions_needs_header = False
+
+        self._decisions_writer.writerow(row)
+        self._decisions_fh.flush()
+        os.fsync(self._decisions_fh.fileno())
 
     # =====================================================
     # ORDERS / FILLS (plan + legs)
@@ -120,6 +181,7 @@ class EventLogger:
                 "order_type": getattr(leg, "order_type", None),
                 "limit_price": getattr(leg, "limit_price", None),
                 "tif": getattr(leg, "tif", None),
+                "plan_meta_json": json.dumps(getattr(plan, "meta", {}) or {}, ensure_ascii=False, sort_keys=True),
 
                 "exec_status": getattr(report, "status", None),
                 "filled_qty": getattr(lf, "filled_qty", None) if lf is not None else None,
@@ -278,3 +340,76 @@ class EventLogger:
         self._mtm_writer.writerow(row)
         self._mtm_fh.flush()
         os.fsync(self._mtm_fh.fileno())
+
+    # =====================================================
+    # POSITIONS / EXPOSURES
+    # =====================================================
+    def log_position_snapshot(
+        self,
+        *,
+        ts_event: float,
+        book: str,
+        pair: str,
+        state: str,
+        side: Optional[str],
+        zscore: Optional[float],
+        spread: Optional[float],
+        target_weight: float,
+        gross_exposure: float,
+        net_exposure: float,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        row = {
+            "ts_wall": time.time(),
+            "ts_event": float(ts_event),
+            "book": book,
+            "pair": pair,
+            "state": state,
+            "side": side,
+            "zscore": zscore,
+            "spread": spread,
+            "target_weight": float(target_weight),
+            "gross_exposure": float(gross_exposure),
+            "net_exposure": float(net_exposure),
+            "metadata_json": json.dumps(metadata or {}, ensure_ascii=False, sort_keys=True),
+        }
+
+        if self._positions_writer is None:
+            self._positions_writer = csv.DictWriter(self._positions_fh, fieldnames=row.keys())
+        if self._positions_needs_header:
+            self._positions_writer.writeheader()
+            self._positions_needs_header = False
+
+        self._positions_writer.writerow(row)
+        self._positions_fh.flush()
+        os.fsync(self._positions_fh.fileno())
+
+    def log_exposure_snapshot(
+        self,
+        *,
+        ts_event: float,
+        scope: str,
+        gross_exposure: float,
+        net_exposure: float,
+        open_positions: int,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        row = {
+            "ts_wall": time.time(),
+            "ts_event": float(ts_event),
+            "scope": scope,
+            "gross_exposure": float(gross_exposure),
+            "net_exposure": float(net_exposure),
+            "open_positions": int(open_positions),
+            "metadata_json": json.dumps(metadata or {}, ensure_ascii=False, sort_keys=True),
+        }
+
+        if self._exposures_writer is None:
+            self._exposures_writer = csv.DictWriter(self._exposures_fh, fieldnames=row.keys())
+        if self._exposures_needs_header:
+            self._exposures_writer.writeheader()
+            self._exposures_needs_header = False
+
+        self._exposures_writer.writerow(row)
+        self._exposures_fh.flush()
+        os.fsync(self._exposures_fh.fileno())

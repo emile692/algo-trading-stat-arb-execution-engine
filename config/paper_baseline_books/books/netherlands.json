@@ -1,0 +1,36 @@
+{
+  "book": "netherlands",
+  "country": "NL",
+  "stats_path": "research/pair_stats.sample.json",
+  "universe": [
+    {"symbol": "ASML", "currency": "EUR", "exchange": "AEB"},
+    {"symbol": "INGA", "currency": "EUR", "exchange": "AEB"},
+    {"symbol": "ADYEN", "currency": "EUR", "exchange": "AEB"},
+    {"symbol": "PHIA", "currency": "EUR", "exchange": "AEB"},
+    {"symbol": "AKZA", "currency": "EUR", "exchange": "AEB"},
+    {"symbol": "HEIA", "currency": "EUR", "exchange": "AEB"}
+  ],
+  "pairs": [
+    {
+      "pair_id": "ASML_INGA",
+      "asset_1": "ASML",
+      "asset_2": "INGA",
+      "beta": 1.05,
+      "fixture": {"profile": "mean_revert_long", "base_price_2": 42.0}
+    },
+    {
+      "pair_id": "ADYEN_PHIA",
+      "asset_1": "ADYEN",
+      "asset_2": "PHIA",
+      "beta": 0.9,
+      "fixture": {"profile": "mean_revert_short", "base_price_2": 65.0}
+    },
+    {
+      "pair_id": "AKZA_HEIA",
+      "asset_1": "AKZA",
+      "asset_2": "HEIA",
+      "beta": 1.0,
+      "fixture": {"profile": "flat", "base_price_2": 29.0}
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "defaults": {
+    "rolling_window": 20,
+    "thresholds": {
+      "z_entry": 1.8,
+      "z_exit": 0.6,
+      "z_stop": 3.6,
+      "max_holding_days": 10
+    },
+    "gate_thresholds": {
+      "corr_min": 0.3,
+      "adf_p_max": 0.05,
+      "eg_p_max": 0.05,
+      "half_life_max": 100
+    },
+    "gate_switches": {
+      "corr": true,
+      "adf": true,
+      "engle_granger": true,
+      "half_life": true
+    },
+    "top_k": 20,
+    "min_pairs_required": 3,
+    "allocation_mode": "equal_weight",
+    "gross_target": 1.0
+  },
+  "books": [
+    {
+      "book": "france",
+      "country": "FR",
+      "universe": [
+        {"symbol": "AIR", "currency": "EUR", "exchange": "SBF"},
+        {"symbol": "BNP", "currency": "EUR", "exchange": "SBF"},
+        {"symbol": "OR", "currency": "EUR", "exchange": "SBF"},
+        {"symbol": "MC", "currency": "EUR", "exchange": "SBF"},
+        {"symbol": "ENGI", "currency": "EUR", "exchange": "SBF"},
+        {"symbol": "VIE", "currency": "EUR", "exchange": "SBF"}
+      ],
+      "pairs": [
+        {
+          "pair_id": "AIR_BNP",
+          "asset_1": "AIR",
+          "asset_2": "BNP",
+          "beta": 0.85,
+          "stats": {"correlation": 0.71, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.02, "half_life": 24},
+          "fixture": {"profile": "mean_revert_short", "base_price_2": 58.0}
+        },
+        {
+          "pair_id": "OR_MC",
+          "asset_1": "OR",
+          "asset_2": "MC",
+          "beta": 1.10,
+          "stats": {"correlation": 0.69, "adf_pvalue": 0.02, "engle_granger_pvalue": 0.03, "half_life": 27},
+          "fixture": {"profile": "mean_revert_long", "base_price_2": 71.0}
+        },
+        {
+          "pair_id": "ENGI_VIE",
+          "asset_1": "ENGI",
+          "asset_2": "VIE",
+          "beta": 1.00,
+          "thresholds": {"max_holding_days": 2},
+          "stats": {"correlation": 0.56, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 31},
+          "fixture": {"profile": "stale_short", "base_price_2": 33.0}
+        }
+      ]
+    },
+    {
+      "book": "germany",
+      "country": "DE",
+      "universe": [
+        {"symbol": "SAP", "currency": "EUR", "exchange": "IBIS"},
+        {"symbol": "BMW", "currency": "EUR", "exchange": "IBIS"},
+        {"symbol": "MBG", "currency": "EUR", "exchange": "IBIS"},
+        {"symbol": "VOW3", "currency": "EUR", "exchange": "IBIS"},
+        {"symbol": "SIE", "currency": "EUR", "exchange": "IBIS"},
+        {"symbol": "BAS", "currency": "EUR", "exchange": "IBIS"}
+      ],
+      "pairs": [
+        {
+          "pair_id": "SAP_BMW",
+          "asset_1": "SAP",
+          "asset_2": "BMW",
+          "beta": 0.95,
+          "stats": {"correlation": 0.63, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 20},
+          "fixture": {"profile": "mean_revert_short", "base_price_2": 86.0}
+        },
+        {
+          "pair_id": "MBG_VOW3",
+          "asset_1": "MBG",
+          "asset_2": "VOW3",
+          "beta": 1.00,
+          "stats": {"correlation": 0.67, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.02, "half_life": 18},
+          "fixture": {"profile": "stop_out_short", "base_price_2": 54.0}
+        },
+        {
+          "pair_id": "SIE_BAS",
+          "asset_1": "SIE",
+          "asset_2": "BAS",
+          "beta": 1.00,
+          "stats": {"correlation": 0.59, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 34},
+          "fixture": {"profile": "mean_revert_long", "base_price_2": 48.0}
+        }
+      ]
+    },
+    {
+      "book": "netherlands",
+      "country": "NL",
+      "universe": [
+        {"symbol": "ASML", "currency": "EUR", "exchange": "AEB"},
+        {"symbol": "INGA", "currency": "EUR", "exchange": "AEB"},
+        {"symbol": "ADYEN", "currency": "EUR", "exchange": "AEB"},
+        {"symbol": "PHIA", "currency": "EUR", "exchange": "AEB"},
+        {"symbol": "AKZA", "currency": "EUR", "exchange": "AEB"},
+        {"symbol": "HEIA", "currency": "EUR", "exchange": "AEB"}
+      ],
+      "pairs": [
+        {
+          "pair_id": "ASML_INGA",
+          "asset_1": "ASML",
+          "asset_2": "INGA",
+          "beta": 1.05,
+          "stats": {"correlation": 0.61, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 21},
+          "fixture": {"profile": "mean_revert_long", "base_price_2": 42.0}
+        },
+        {
+          "pair_id": "ADYEN_PHIA",
+          "asset_1": "ADYEN",
+          "asset_2": "PHIA",
+          "beta": 0.90,
+          "stats": {"correlation": 0.57, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 28},
+          "fixture": {"profile": "mean_revert_short", "base_price_2": 65.0}
+        },
+        {
+          "pair_id": "AKZA_HEIA",
+          "asset_1": "AKZA",
+          "asset_2": "HEIA",
+          "beta": 1.00,
+          "stats": {"correlation": 0.54, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 36},
+          "fixture": {"profile": "flat", "base_price_2": 29.0}
+        }
+      ]
+    },
+    {
+      "book": "sweden",
+      "country": "SE",
+      "universe": [
+        {"symbol": "ATCOA", "currency": "SEK", "exchange": "SFB"},
+        {"symbol": "ABB", "currency": "SEK", "exchange": "SFB"},
+        {"symbol": "ERICB", "currency": "SEK", "exchange": "SFB"},
+        {"symbol": "VOLV", "currency": "SEK", "exchange": "SFB"},
+        {"symbol": "SEBA", "currency": "SEK", "exchange": "SFB"},
+        {"symbol": "SWEDA", "currency": "SEK", "exchange": "SFB"}
+      ],
+      "pairs": [
+        {
+          "pair_id": "ATCOA_ABB",
+          "asset_1": "ATCOA",
+          "asset_2": "ABB",
+          "beta": 0.98,
+          "stats": {"correlation": 0.66, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 19},
+          "fixture": {"profile": "mean_revert_short", "base_price_2": 41.0}
+        },
+        {
+          "pair_id": "ERICB_VOLV",
+          "asset_1": "ERICB",
+          "asset_2": "VOLV",
+          "beta": 1.00,
+          "thresholds": {"max_holding_days": 2},
+          "stats": {"correlation": 0.62, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 29},
+          "fixture": {"profile": "stale_long", "base_price_2": 37.0}
+        },
+        {
+          "pair_id": "SEBA_SWEDA",
+          "asset_1": "SEBA",
+          "asset_2": "SWEDA",
+          "beta": 1.00,
+          "stats": {"correlation": 0.58, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 25},
+          "fixture": {"profile": "mean_revert_long", "base_price_2": 44.0}
+        }
+      ]
+    }
+  ]
+}

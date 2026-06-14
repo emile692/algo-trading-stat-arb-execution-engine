@@ -1,0 +1,13 @@
+pair_id,correlation,adf_pvalue,engle_granger_pvalue,half_life,paper_ready,live_ready,notes
+AIR_BNP,0.71,0.03,0.02,24,true,false,Sample research snapshot.
+OR_MC,0.69,0.02,0.03,27,true,false,
+ENGI_VIE,0.56,0.04,0.04,31,true,false,
+SAP_BMW,0.63,0.03,0.03,20,true,false,
+MBG_VOW3,0.67,0.03,0.02,18,true,false,
+SIE_BAS,0.59,0.04,0.04,34,true,false,
+ASML_INGA,0.61,0.03,0.03,21,true,false,
+ADYEN_PHIA,0.57,0.04,0.04,28,true,false,
+AKZA_HEIA,0.54,0.03,0.03,36,true,false,
+ATCOA_ABB,0.66,0.03,0.03,19,true,false,
+ERICB_VOLV,0.62,0.04,0.04,29,true,false,
+SEBA_SWEDA,0.58,0.03,0.03,25,true,false,

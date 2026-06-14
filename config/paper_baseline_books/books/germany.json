@@ -1,0 +1,36 @@
+{
+  "book": "germany",
+  "country": "DE",
+  "stats_path": "research/pair_stats.sample.json",
+  "universe": [
+    {"symbol": "SAP", "currency": "EUR", "exchange": "IBIS"},
+    {"symbol": "BMW", "currency": "EUR", "exchange": "IBIS"},
+    {"symbol": "MBG", "currency": "EUR", "exchange": "IBIS"},
+    {"symbol": "VOW3", "currency": "EUR", "exchange": "IBIS"},
+    {"symbol": "SIE", "currency": "EUR", "exchange": "IBIS"},
+    {"symbol": "BAS", "currency": "EUR", "exchange": "IBIS"}
+  ],
+  "pairs": [
+    {
+      "pair_id": "SAP_BMW",
+      "asset_1": "SAP",
+      "asset_2": "BMW",
+      "beta": 0.95,
+      "fixture": {"profile": "mean_revert_short", "base_price_2": 86.0}
+    },
+    {
+      "pair_id": "MBG_VOW3",
+      "asset_1": "MBG",
+      "asset_2": "VOW3",
+      "beta": 1.0,
+      "fixture": {"profile": "stop_out_short", "base_price_2": 54.0}
+    },
+    {
+      "pair_id": "SIE_BAS",
+      "asset_1": "SIE",
+      "asset_2": "BAS",
+      "beta": 1.0,
+      "fixture": {"profile": "mean_revert_long", "base_price_2": 48.0}
+    }
+  ]
+}

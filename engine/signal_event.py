@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 
 class SignalType(Enum):
@@ -16,3 +16,5 @@ class SignalEvent:
     zscore: float
     spread: float
     timestamp: float
+    reason: Optional[str] = None
+    meta: dict[str, Any] = field(default_factory=dict)

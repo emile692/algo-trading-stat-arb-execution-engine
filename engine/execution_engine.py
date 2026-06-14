@@ -200,7 +200,15 @@ class ExecutionEngine:
 
         # Execute exits first
         for pair, ev in exit_events.items():
-            self._execute_exit(pair, ev=ev, exit_reason="EXIT_SIGNAL" if pair in self.last_signal and self.last_signal[pair].signal == SignalType.EXIT else "REPLACEMENT")
+            self._execute_exit(
+                pair,
+                ev=ev,
+                exit_reason=(
+                    ev.reason
+                    if pair in self.last_signal and self.last_signal[pair].signal == SignalType.EXIT and ev.reason
+                    else ("EXIT_SIGNAL" if pair in self.last_signal and self.last_signal[pair].signal == SignalType.EXIT else "REPLACEMENT")
+                ),
+            )
 
         # Recompute capacity after exits
         open_count = self.open_positions_count()
@@ -239,10 +247,15 @@ class ExecutionEngine:
             action="ENTRY",
             spread_side=spread_side,
             legs=legs,
-            meta={"zscore": float(ev.zscore), "spread": float(ev.spread)},
+            meta={
+                "zscore": float(ev.zscore),
+                "spread": float(ev.spread),
+                "reason": ev.reason,
+                "signal_meta": dict(ev.meta),
+            },
         )
 
-    def _build_exit_plan(self, pair: str) -> OrderPlan:
+    def _build_exit_plan(self, pair: str, *, ev: SignalEvent, exit_reason: str) -> OrderPlan:
         meta = self.pair_meta.get(pair)
         if meta is None:
             raise RuntimeError(f"Pair '{pair}' not registered (missing sym1/sym2/hedge_ratio).")
@@ -265,7 +278,19 @@ class ExecutionEngine:
                 LegOrder(symbol=meta.sym2, side=OrderSide.SELL, qty=q2, order_type=OrderType.MKT),
             ]
 
-        return OrderPlan(pair=pair, action="EXIT", spread_side=None, legs=legs, meta={})
+        return OrderPlan(
+            pair=pair,
+            action="EXIT",
+            spread_side=None,
+            legs=legs,
+            meta={
+                "zscore": float(ev.zscore),
+                "spread": float(ev.spread),
+                "reason": exit_reason,
+                "signal_reason": ev.reason,
+                "signal_meta": dict(ev.meta),
+            },
+        )
 
     # -------------------------
     # Execution
@@ -322,6 +347,12 @@ class ExecutionEngine:
             except Exception:
                 pos.trade_id = plan.plan_id
 
+            if self.portfolio is not None:
+                try:
+                    self.portfolio.on_trade_open(ts=time.time(), pair=pair, trade_id=pos.trade_id)
+                except Exception:
+                    pass
+
         except Exception as e:
             pos.state = PositionState.ERROR
             pos.last_error = f"{type(e).__name__}: {e}"
@@ -335,7 +366,7 @@ class ExecutionEngine:
         pos.last_error = None
 
         try:
-            plan = self._build_exit_plan(pair)
+            plan = self._build_exit_plan(pair, ev=ev, exit_reason=exit_reason)
             pos.last_plan_id = plan.plan_id
 
             report = self.om.submit(plan, price_snapshot=None)

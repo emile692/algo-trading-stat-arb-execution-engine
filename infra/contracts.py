@@ -1,4 +1,4 @@
-from ib_insync import Stock
+from __future__ import annotations
 
 
 def make_stock_contract(
@@ -8,11 +8,11 @@ def make_stock_contract(
     primary_exchange: str | None = None,
 ):
     """
-    Construit un contrat action IBKR.
-    Pour actions EU, le primaryExchange est souvent nécessaire:
-    - Paris: SBF (Euronext Paris)
-    - Xetra: IBIS
+    Build an IBKR stock contract.
+    For many EU equities, primary exchange is needed to avoid ambiguity.
     """
+    from ib_insync import Stock
+
     if primary_exchange:
         return Stock(symbol, exchange, currency, primaryExchange=primary_exchange)
     return Stock(symbol, exchange, currency)

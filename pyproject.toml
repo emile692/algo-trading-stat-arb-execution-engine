@@ -8,3 +8,7 @@ dependencies = [
     "ib-insync>=0.9.86",
     "ibapi>=9.81.1.post1",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,160 @@
+{
+  "pairs": {
+    "AIR_BNP": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "OR_MC": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "ENGI_VIE": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "SAP_BMW": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "MBG_VOW3": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "SIE_BAS": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "ASML_INGA": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "ADYEN_PHIA": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "AKZA_HEIA": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "ATCOA_ABB": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "ERICB_VOLV": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    },
+    "SEBA_SWEDA": {
+      "stats": {
+        "correlation": null,
+        "adf_pvalue": null,
+        "engle_granger_pvalue": null,
+        "half_life": null
+      },
+      "readiness": {
+        "paper_ready": true,
+        "live_ready": false,
+        "notes": "Populate from research pipeline."
+      }
+    }
+  }
+}

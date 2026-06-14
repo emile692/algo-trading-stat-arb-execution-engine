@@ -1,0 +1,25 @@
+{
+  "rolling_window": 20,
+  "thresholds": {
+    "z_entry": 1.8,
+    "z_exit": 0.6,
+    "z_stop": 3.6,
+    "max_holding_days": 10
+  },
+  "gate_thresholds": {
+    "corr_min": 0.3,
+    "adf_p_max": 0.05,
+    "eg_p_max": 0.05,
+    "half_life_max": 100
+  },
+  "gate_switches": {
+    "corr": true,
+    "adf": true,
+    "engle_granger": true,
+    "half_life": true
+  },
+  "top_k": 20,
+  "min_pairs_required": 3,
+  "allocation_mode": "equal_weight",
+  "gross_target": 1.0
+}

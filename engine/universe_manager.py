@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple, Set, List
 
 from ib_insync import IB, Contract, Ticker
 
-from infra.contracts import make_stock_contract
+from infra.ibkr_contracts import qualify_stock_contract
 from engine.market_data_guard import MarketDataGuard, MarketDataGuardConfig, SymbolKey
 
 
@@ -98,18 +98,6 @@ class UniverseManager:
                 w.writeheader()
             w.writerow(row)
 
-    # ------------------------
-    # Contract qualification
-    # ------------------------
-    def _try_contract_details(self, contract: Contract) -> Tuple[Optional[Contract], Optional[str]]:
-        try:
-            details = self.ib.reqContractDetails(contract)
-            if not details:
-                return None, "No contract details returned"
-            return details[0].contract, None
-        except Exception as e:
-            return None, f"{type(e).__name__}: {e}"
-
     def qualify_stock_contract(
         self,
         *,
@@ -121,19 +109,15 @@ class UniverseManager:
         """
         Returns: (qualified_contract or None, error or None, contract_repr_used_for_logging)
         """
-        c1 = make_stock_contract(symbol=symbol, currency=currency, exchange=exchange, primary_exchange=primary_exchange)
-        q1, err1 = self._try_contract_details(c1)
-        if q1 is not None:
-            return q1, None, str(c1)
-
-        if self.cfg.drop_primary_exchange_fallback:
-            c2 = make_stock_contract(symbol=symbol, currency=currency, exchange=exchange, primary_exchange=None)
-            q2, err2 = self._try_contract_details(c2)
-            if q2 is not None:
-                return q2, None, str(c2)
-            return None, err2 or err1 or "Unknown qualification error", str(c2)
-
-        return None, err1 or "Unknown qualification error", str(c1)
+        result = qualify_stock_contract(
+            self.ib,
+            symbol=symbol,
+            currency=currency,
+            exchange=exchange,
+            primary_exchange=primary_exchange,
+            drop_primary_exchange_fallback=self.cfg.drop_primary_exchange_fallback,
+        )
+        return result.contract, result.error, result.contract_repr
 
     # ------------------------
     # Public API

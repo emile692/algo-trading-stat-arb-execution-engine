@@ -1,0 +1,41 @@
+{
+  "pairs": {
+    "AIR_BNP": {
+      "stats": {"correlation": 0.71, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.02, "half_life": 24},
+      "readiness": {"notes": "Sample research snapshot."}
+    },
+    "OR_MC": {
+      "stats": {"correlation": 0.69, "adf_pvalue": 0.02, "engle_granger_pvalue": 0.03, "half_life": 27}
+    },
+    "ENGI_VIE": {
+      "stats": {"correlation": 0.56, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 31}
+    },
+    "SAP_BMW": {
+      "stats": {"correlation": 0.63, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 20}
+    },
+    "MBG_VOW3": {
+      "stats": {"correlation": 0.67, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.02, "half_life": 18}
+    },
+    "SIE_BAS": {
+      "stats": {"correlation": 0.59, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 34}
+    },
+    "ASML_INGA": {
+      "stats": {"correlation": 0.61, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 21}
+    },
+    "ADYEN_PHIA": {
+      "stats": {"correlation": 0.57, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 28}
+    },
+    "AKZA_HEIA": {
+      "stats": {"correlation": 0.54, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 36}
+    },
+    "ATCOA_ABB": {
+      "stats": {"correlation": 0.66, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 19}
+    },
+    "ERICB_VOLV": {
+      "stats": {"correlation": 0.62, "adf_pvalue": 0.04, "engle_granger_pvalue": 0.04, "half_life": 29}
+    },
+    "SEBA_SWEDA": {
+      "stats": {"correlation": 0.58, "adf_pvalue": 0.03, "engle_granger_pvalue": 0.03, "half_life": 25}
+    }
+  }
+}
