@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import sys
 import time
 from pathlib import Path
 from typing import Dict, Optional, List
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from ib_insync import IB, Ticker
 
@@ -31,11 +36,13 @@ from engine.state_publisher import StatePublisher
 # =====================================================
 WINDOW = 20
 REFRESH_SEC = 1.0
-PAIRS_PATH = Path(__file__).resolve().parents[1] / "config" / "pairs.json"
+PAIRS_PATH = ROOT_DIR / "config" / "pairs.json"
+LOG_DIR = ROOT_DIR / "logs"
 
 IB_HOST = "127.0.0.1"
 IB_PORT = 4001
 IB_CLIENT_ID = 1
+IB_CONNECT_TIMEOUT_SEC = 10.0
 
 USE_COLORS = True
 
@@ -226,16 +233,38 @@ def build_table(
     return "\n".join(lines)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Stream live z-scores from IBKR using either legacy pairs or baseline config."
+    )
+    parser.add_argument("--config", type=Path, default=PAIRS_PATH)
+    parser.add_argument("--stats", type=Path, default=None)
+    parser.add_argument("--require-live-ready", action="store_true")
+    parser.add_argument("--log-dir", type=Path, default=LOG_DIR)
+    parser.add_argument("--ib-host", default=IB_HOST)
+    parser.add_argument("--ib-port", type=int, default=IB_PORT)
+    parser.add_argument("--ib-client-id", type=int, default=IB_CLIENT_ID)
+    parser.add_argument("--ib-connect-timeout-sec", type=float, default=IB_CONNECT_TIMEOUT_SEC)
+    parser.add_argument("--refresh-sec", type=float, default=REFRESH_SEC)
+    return parser.parse_args()
+
+
 # =====================================================
 # MAIN
 # =====================================================
 def main() -> None:
+    args = parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     logging.info("Starting z-score streaming")
 
-    pairs_cfg = load_pairs_config(PAIRS_PATH)
+    pairs_cfg = load_pairs_config(
+        args.config,
+        stats_path=args.stats,
+        live_ready_only=args.require_live_ready,
+    )
+    logging.info("Loaded %s pair(s) from %s", len(pairs_cfg), args.config)
 
-    log_dir = Path(__file__).resolve().parents[1] / "logs"
+    log_dir = args.log_dir
     log_dir.mkdir(parents=True, exist_ok=True)
     logger = EventLogger(log_dir)
 
@@ -264,8 +293,8 @@ def main() -> None:
         portfolio=portfolio,  # <-- JALON A
     )
 
-    conn = IBKRConnection(IB_HOST, IB_PORT, IB_CLIENT_ID)
-    conn.connect()
+    conn = IBKRConnection(args.ib_host, args.ib_port, args.ib_client_id)
+    conn.connect(timeout_sec=args.ib_connect_timeout_sec)
     ib: IB = conn.ib
 
     universe = UniverseManager(
@@ -300,7 +329,7 @@ def main() -> None:
             sym1=cfg["asset1"]["symbol"],
             sym2=cfg["asset2"]["symbol"],
             hedge_ratio=cfg["hedge_ratio"],
-            window=WINDOW,
+            window=int(cfg.get("rolling_window", WINDOW)),
         )
         pairs[pair.name] = pair
         signal_engines[pair.name] = SignalEngine(cfg["z_entry"], cfg["z_exit"])
@@ -391,7 +420,7 @@ def main() -> None:
             publisher.publish(snap)
 
             render_frame(build_table(pairs, execution_engine, max_open_positions=MAX_OPEN_POSITIONS))
-            ib.sleep(REFRESH_SEC)
+            ib.sleep(args.refresh_sec)
 
     except KeyboardInterrupt:
         logging.info("Stopped by user.")

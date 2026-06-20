@@ -10,7 +10,7 @@ The repo now has two usable paths:
 Offline baseline smoke runner with local books, pair logic, paper execution, portfolio aggregation, audit logs, and either synthetic fixtures or IBKR daily closes.
 
 2. `scripts/stream_zscore.py`
-Live-oriented IBKR loop based on the older pair config flow.
+Live-oriented IBKR loop that still supports the legacy pair config flow and can now ingest the baseline books config directly.
 
 The baseline execution layer reuses the existing OMS/paper core:
 - `engine/execution_engine.py`
@@ -40,14 +40,38 @@ Create a virtual environment, then run:
 
 ```powershell
 uv run pytest -q
-python -m unittest discover -s tests -v
-python scripts\run_paper_baseline.py --days 30
+uv run python -m unittest discover -s tests -v
+uv run python scripts\run_paper_baseline.py --days 30
 ```
 
 To run the same baseline with daily closes fetched from IBKR:
 
 ```powershell
-python scripts\run_paper_baseline.py --market-source ibkr --days 60 --ib-host 127.0.0.1 --ib-port 4002 --ib-client-id 21
+uv run python scripts\run_paper_baseline.py --market-source ibkr --days 60 --ib-host 127.0.0.1 --ib-port 4002 --ib-client-id 21
+```
+
+To run the live z-score stream against the legacy pairs config:
+
+```powershell
+uv run python scripts\stream_zscore.py --config config\pairs.json
+```
+
+To run the live z-score stream against the baseline books config:
+
+```powershell
+uv run python scripts\stream_zscore.py --config config\paper_baseline_books
+```
+
+If you only want pairs explicitly tagged as live-ready in the research sidecar:
+
+```powershell
+uv run python scripts\stream_zscore.py --config config\paper_baseline_books --require-live-ready
+```
+
+You can also point the live stream at an explicit stats overlay:
+
+```powershell
+uv run python scripts\stream_zscore.py --config config\paper_baseline_books --stats config\paper_baseline_books\research\pair_stats.sample.json --require-live-ready
 ```
 
 ### Baseline smoke outputs
@@ -95,6 +119,8 @@ If you point the baseline loader at the legacy format, it automatically adapts s
 
 Cross-country pairs and unsupported exchanges are skipped in that compatibility path.
 
+`load_pairs_config(...)`, which powers `scripts/stream_zscore.py`, now supports the same baseline books sources in addition to the legacy live format. Baseline assets are adapted to the live IBKR contract shape automatically, including `SMART + primary_exchange` mapping for local European listings.
+
 ### Research stats sidecar
 
 The preferred directory layout separates structure from research metrics:
@@ -109,19 +135,19 @@ The preferred directory layout separates structure from research metrics:
 You can run the smoke with an explicit sidecar:
 
 ```powershell
-python scripts\run_paper_baseline.py --config config\paper_baseline_books --stats config\paper_baseline_books\research\pair_stats.sample.json --days 30
+uv run python scripts\run_paper_baseline.py --config config\paper_baseline_books --stats config\paper_baseline_books\research\pair_stats.sample.json --days 30
 ```
 
 CSV sidecars are also supported:
 
 ```powershell
-python scripts\run_paper_baseline.py --config config\paper_baseline_books --stats config\paper_baseline_books\research\pair_stats.sample.csv --days 30
+uv run python scripts\run_paper_baseline.py --config config\paper_baseline_books --stats config\paper_baseline_books\research\pair_stats.sample.csv --days 30
 ```
 
 To generate a blank template for a new research export:
 
 ```powershell
-python scripts\build_pair_stats_template.py --config config\paper_baseline_books
+uv run python scripts\build_pair_stats_template.py --config config\paper_baseline_books
 ```
 
 ### IBKR Daily Close Mode
@@ -145,7 +171,7 @@ Useful flags:
 To debug the broker path independently from the baseline runner:
 
 ```powershell
-python scripts\test_connection.py --host 127.0.0.1 --port 4002 --client-id 21 --symbol AIR --currency EUR --exchange SMART --primary-exchange SBF
+uv run python scripts\test_connection.py --host 127.0.0.1 --port 4002 --client-id 21 --symbol AIR --currency EUR --exchange SMART --primary-exchange SBF
 ```
 
 This preflight script:
@@ -161,7 +187,7 @@ This preflight script:
 To materialize an explicit baseline config from the legacy pairs file:
 
 ```powershell
-python scripts\build_baseline_config.py --input config\pairs.json --output config\baseline_from_legacy_pairs.json
+uv run python scripts\build_baseline_config.py --input config\pairs.json --output config\baseline_from_legacy_pairs.json
 ```
 
 ### Next recommended work
@@ -170,5 +196,5 @@ The highest-value next steps are:
 
 1. Replace synthetic fixtures with real precomputed daily bars or research exports.
 2. Feed real statistical gate metrics into the baseline instead of config stubs.
-3. Unify the live IBKR loop with the local-book baseline so offline and live share the same signal path.
+3. Finish unifying the live IBKR loop with the local-book baseline so offline and live share the same signal path, not just the same config source.
 4. Split real candidate universes into dedicated book files per country.
